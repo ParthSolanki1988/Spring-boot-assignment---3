@@ -1,17 +1,26 @@
 package com.simform.studentslf4j.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Cache;
 
 @Data
 @NoArgsConstructor
-@Entity
+@Entity       //JPA dependency
 @Table(name = "student")
+//@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY , region = "student")
+@Builder
 public class Student {
+
+  public Student(long id, String name, String technology) {
+    this.id = id;
+    this.name = name;
+    this.technology = technology;
+  }
 
   @Id
   @Column(name = "student_id")
@@ -20,4 +29,6 @@ public class Student {
   String name;
   @Column(name = "student_technology")
   String technology;
+
+
 }

@@ -3,10 +3,12 @@ package com.simform.studentslf4j.Service.Impl;
 import com.simform.studentslf4j.Entity.Student;
 import com.simform.studentslf4j.Repository.StudentRepository;
 import com.simform.studentslf4j.Service.StudentService;
+import com.simform.studentslf4j.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -18,7 +20,12 @@ public class StudentServiceImplementation implements StudentService {
 
   @Override
   public Student createStudent(Student student) {
-    return studentRepository.save(student);
+    if (student != null){
+      return studentRepository.save(student);
+    }
+    else {
+      throw new NotFoundException("Student not found");
+    }
 
   }
 
@@ -33,9 +40,14 @@ public class StudentServiceImplementation implements StudentService {
     }
 
 
-    return studentRepository.findAll();
+    List<Student> all = studentRepository.findAll();
+
+    return all;
+
 
   }
+
+
 
   @Override
   public Student updateStudent(Student student) {
@@ -61,14 +73,21 @@ public class StudentServiceImplementation implements StudentService {
   }
 
   @Override
-  public String deleteStudent(long id) {
-    if (!studentRepository.existsById(id)){
-      return "Student Id Not found";
+  public Student deleteStudent(long id) {
+    Optional<Student> optionalStudent = studentRepository.findById(id);
+    if (optionalStudent.isEmpty()){
+      return null;
     }
     else {
       studentRepository.deleteById(id);
-      return "Student Removed with ID : " + id;
+      return optionalStudent.get();
+
     }
 
+  }
+
+  @Override
+  public Student findById(Long id) {
+    return studentRepository.findById(id).get();
   }
 }

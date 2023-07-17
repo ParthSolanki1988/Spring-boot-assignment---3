@@ -2,11 +2,14 @@ package com.simform.studentslf4j.Controller;
 
 import com.simform.studentslf4j.Entity.Student;
 import com.simform.studentslf4j.Service.StudentService;
+import com.simform.studentslf4j.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,30 +22,46 @@ public class StudentController {
 
   // build create User REST API
 
-  //  CREAT
+  //  CREATE
   @PostMapping
   public ResponseEntity<Student> createStudents(@RequestBody Student student){
-
-    if (student.getId() == 0 || student.getId() < 0){
-      log.warn("Enter Valid Id for Create Student");
-      return null;
-    }
-    else {
       log.info("Create User");
       Student saveStudent = studentService.createStudent(student);
       return new ResponseEntity<>(saveStudent , HttpStatus.CREATED);
-    }
   }
 
   //READ
 
   // build get user by id REST API
-  // http://localhost:8080/api/v1/studens
+  // http://localhost:8080/api/v1/students
   @GetMapping
   public ResponseEntity<List<Student>> getAllStudents(){
     log.info("Getting all student ");
+
+
     List<Student> listOfStudent = studentService.getAllStudents();
-    return new ResponseEntity<>(listOfStudent , HttpStatus.OK );
+
+    if (!listOfStudent.isEmpty()){
+      return new ResponseEntity<>(listOfStudent , HttpStatus.FOUND);
+    }
+    else {
+      throw new NotFoundException("Student List Not Found");
+    }
+
+  }
+
+
+  @GetMapping("{id}")
+  public ResponseEntity<Student> getStudentById(@PathVariable("id") Long id){
+    log.info("Getting Student By Id");
+    Student student = studentService.findById(id);
+    System.out.println(student);
+    if (student != null){
+      return new ResponseEntity<>(student , HttpStatus.FOUND );
+    }else {
+      throw new NotFoundException("Student Not Found");
+    }
+
   }
 
 
@@ -50,12 +69,8 @@ public class StudentController {
 
   // http://localhost:8080/api/v1/students/{id}
   @PutMapping("{id}")
-  public ResponseEntity<Student> updatedStudent(@PathVariable("id") Long id,@RequestBody Student student){
+    public ResponseEntity<Student> updatedStudent(@PathVariable("id") Long id,@RequestBody Student student){
     boolean isDigit = true;
-
-//    try{
-//      Integer.parseInt()
-//    }
 
    if (id == 0 || id < 0){
      log.warn("Enter Valid Id for update student");
